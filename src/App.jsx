@@ -1,27 +1,43 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import BarChart from "./components/BarChart";
+import { generateRandomArray } from "./utils/array";
+
+const DEFAULT_SIZE = 30;
 
 export default function App() {
-  const [moved, setMoved] = useState(false);
+  const [size, setSize] = useState(DEFAULT_SIZE);
+  const [values, setValues] = useState(() => generateRandomArray(DEFAULT_SIZE));
+
+  function handleSizeChange(event) {
+    const newSize = Number(event.target.value);
+    setSize(newSize);
+    setValues(generateRandomArray(newSize));
+  }
+
+  function handleNewArray() {
+    setValues(generateRandomArray(size));
+  }
 
   return (
     <main style={{ padding: 24 }}>
       <h1>Visortr</h1>
       <p>See algorithms think.</p>
 
-      <button onClick={() => setMoved((m) => !m)}>Move the bar</button>
+      <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
+        <button onClick={handleNewArray}>New array</button>
+        <label>
+          Size: {size}{" "}
+          <input
+            type="range"
+            min={5}
+            max={100}
+            value={size}
+            onChange={handleSizeChange}
+          />
+        </label>
+      </div>
 
-      <svg width="400" height="120" style={{ display: "block", marginTop: 16 }}>
-        <motion.rect
-          y={20}
-          width={40}
-          height={80}
-          rx={4}
-          fill="#38bdf8"
-          animate={{ x: moved ? 300 : 20 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        />
-      </svg>
+      <BarChart values={values} />
     </main>
   );
 }
