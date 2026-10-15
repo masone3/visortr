@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import BarChart from "./components/BarChart";
+import Controls from "./components/Controls";
+import { usePlayback } from "./hooks/usePlayback";
+import { bubbleSort } from "./algorithms/bubbleSort";
 import { generateRandomArray } from "./utils/array";
 
 const DEFAULT_SIZE = 30;
@@ -7,6 +10,9 @@ const DEFAULT_SIZE = 30;
 export default function App() {
   const [size, setSize] = useState(DEFAULT_SIZE);
   const [values, setValues] = useState(() => generateRandomArray(DEFAULT_SIZE));
+
+  const steps = useMemo(() => bubbleSort(values), [values]);
+  const playback = usePlayback(steps);
 
   function handleSizeChange(event) {
     const newSize = Number(event.target.value);
@@ -23,7 +29,7 @@ export default function App() {
       <h1>Visortr</h1>
       <p>See algorithms think.</p>
 
-      <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
         <button onClick={handleNewArray}>New array</button>
         <label>
           Size: {size}{" "}
@@ -37,7 +43,25 @@ export default function App() {
         </label>
       </div>
 
-      <BarChart values={values} />
+      <Controls
+        isPlaying={playback.isPlaying}
+        index={playback.index}
+        last={playback.last}
+        speed={playback.speed}
+        onPlay={playback.play}
+        onPause={playback.pause}
+        onNext={playback.next}
+        onPrev={playback.prev}
+        onReset={playback.reset}
+        onSpeedChange={playback.setSpeed}
+      />
+
+      <BarChart
+        values={playback.step.array}
+        comparing={playback.step.comparing}
+        swapping={playback.step.swapping}
+        sorted={playback.step.sorted}
+      />
     </main>
   );
 }
