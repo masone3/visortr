@@ -3,25 +3,25 @@ import BarChart from "./components/BarChart";
 import Controls from "./components/Controls";
 import { usePlayback } from "./hooks/usePlayback";
 import { bubbleSort } from "./algorithms/bubbleSort";
-import { generateRandomArray } from "./utils/array";
+import { createItems } from "./utils/array";
 
 const DEFAULT_SIZE = 30;
 
 export default function App() {
   const [size, setSize] = useState(DEFAULT_SIZE);
-  const [values, setValues] = useState(() => generateRandomArray(DEFAULT_SIZE));
+  const [items, setItems] = useState(() => createItems(DEFAULT_SIZE));
 
-  const steps = useMemo(() => bubbleSort(values), [values]);
+  const steps = useMemo(() => bubbleSort(items), [items]);
   const playback = usePlayback(steps);
 
   function handleSizeChange(event) {
     const newSize = Number(event.target.value);
     setSize(newSize);
-    setValues(generateRandomArray(newSize));
+    setItems(createItems(newSize));
   }
 
   function handleNewArray() {
-    setValues(generateRandomArray(size));
+    setItems(createItems(size));
   }
 
   return (
@@ -57,10 +57,11 @@ export default function App() {
       />
 
       <BarChart
-        values={playback.step.array}
+        items={playback.step.array}
         comparing={playback.step.comparing}
         swapping={playback.step.swapping}
         sorted={playback.step.sorted}
+        stepDelay={playback.delay}
       />
     </main>
   );

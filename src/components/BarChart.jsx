@@ -1,6 +1,9 @@
+import { motion } from "framer-motion";
+
 const CHART_WIDTH = 800;
 const CHART_HEIGHT = 400;
 const BAR_GAP = 2;
+const MAX_MOVE_SECONDS = 0.3;
 
 const COLORS = {
   default: "#38bdf8",
@@ -17,14 +20,16 @@ function getColor(index, { comparing, swapping, sorted }) {
 }
 
 export default function BarChart({
-  values,
+  items,
   comparing = [],
   swapping = [],
   sorted = [],
   maxValue = 100,
+  stepDelay = 100,
 }) {
-  const slotWidth = CHART_WIDTH / values.length;
+  const slotWidth = CHART_WIDTH / items.length;
   const barWidth = slotWidth - BAR_GAP;
+  const moveSeconds = Math.min(MAX_MOVE_SECONDS, (stepDelay / 1000) * 0.9);
 
   return (
     <svg
@@ -32,17 +37,21 @@ export default function BarChart({
       width="100%"
       style={{ display: "block", maxWidth: CHART_WIDTH }}
     >
-      {values.map((value, index) => {
-        const barHeight = (value / maxValue) * CHART_HEIGHT;
+      {items.map((item, index) => {
+        const barHeight = (item.value / maxValue) * CHART_HEIGHT;
         return (
-          <rect
-            key={index}
-            x={index * slotWidth}
+          <motion.rect
+            key={item.id}
             y={CHART_HEIGHT - barHeight}
             width={barWidth}
             height={barHeight}
             rx={2}
-            fill={getColor(index, { comparing, swapping, sorted })}
+            initial={false}
+            animate={{
+              x: index * slotWidth,
+              fill: getColor(index, { comparing, swapping, sorted }),
+            }}
+            transition={{ duration: moveSeconds, ease: "easeInOut" }}
           />
         );
       })}

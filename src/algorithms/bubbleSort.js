@@ -19,7 +19,7 @@ export function bubbleSort(input) {
     for (let i = 0; i < end; i++) {
       record({ comparing: [i, i + 1] });
 
-      if (arr[i] > arr[i + 1]) {
+      if (arr[i].value > arr[i + 1].value) {
         [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
         record({ swapping: [i, i + 1] });
       }
