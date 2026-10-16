@@ -52,6 +52,7 @@ export function usePlayback(steps) {
     last,
     isPlaying: state.isPlaying,
     speed: state.speed,
+    delay,
     play: () => dispatch({ type: "play", last }),
     pause: () => dispatch({ type: "pause" }),
     next: () => dispatch({ type: "next", last }),
