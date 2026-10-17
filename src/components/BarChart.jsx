@@ -24,6 +24,7 @@ export default function BarChart({
   comparing = [],
   swapping = [],
   sorted = [],
+  range = null,
   maxValue = 100,
   stepDelay = 100,
 }) {
@@ -50,6 +51,7 @@ export default function BarChart({
             animate={{
               x: index * slotWidth,
               fill: getColor(index, { comparing, swapping, sorted }),
+              opacity: inactive ? 0.25 : 1,
             }}
             transition={{ duration: moveSeconds, ease: "easeInOut" }}
           />
