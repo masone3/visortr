@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import BarChart from "./components/BarChart";
 import Controls from "./components/Controls";
 import { usePlayback } from "./hooks/usePlayback";
-import { bubbleSort } from "./algorithms/bubbleSort";
+import { ALGORITHMS } from "./algorithms";
 import { createItems } from "./utils/array";
 
 const DEFAULT_SIZE = 30;
@@ -10,8 +10,12 @@ const DEFAULT_SIZE = 30;
 export default function App() {
   const [size, setSize] = useState(DEFAULT_SIZE);
   const [items, setItems] = useState(() => createItems(DEFAULT_SIZE));
+  const [algoKey, setAlgoKey] = useState("merge");
 
-  const steps = useMemo(() => bubbleSort(items), [items]);
+  const steps = useMemo(
+    () => ALGORITHMS[algoKey].run(items),
+    [algoKey, items]
+  );
   const playback = usePlayback(steps);
 
   function handleSizeChange(event) {
@@ -30,6 +34,13 @@ export default function App() {
       <p>See algorithms think.</p>
 
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+        <select value={algoKey} onChange={(e) => setAlgoKey(e.target.value)}>
+          {Object.entries(ALGORITHMS).map(([key, algo]) => (
+            <option key={key} value={key}>
+              {algo.name}
+            </option>
+          ))}
+        </select>
         <button onClick={handleNewArray}>New array</button>
         <label>
           Size: {size}{" "}
@@ -61,6 +72,7 @@ export default function App() {
         comparing={playback.step.comparing}
         swapping={playback.step.swapping}
         sorted={playback.step.sorted}
+        range={playback.step.range}
         stepDelay={playback.delay}
       />
     </main>
