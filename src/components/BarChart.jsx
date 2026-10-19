@@ -10,10 +10,12 @@ const COLORS = {
   comparing: "#facc15",
   swapping: "#f87171",
   sorted: "#4ade80",
+  pivot: "#c084fc",
 };
 
-function getColor(index, { comparing, swapping, sorted }) {
+function getColor(index, { comparing, swapping, sorted, pivot }) {
   if (swapping.includes(index)) return COLORS.swapping;
+  if (index === pivot) return COLORS.pivot;
   if (comparing.includes(index)) return COLORS.comparing;
   if (sorted.includes(index)) return COLORS.sorted;
   return COLORS.default;
@@ -27,6 +29,7 @@ export default function BarChart({
   range = null,
   maxValue = 100,
   stepDelay = 100,
+  pivot = null,
 }) {
   const slotWidth = CHART_WIDTH / items.length;
   const barWidth = slotWidth - BAR_GAP;
@@ -50,7 +53,7 @@ export default function BarChart({
             initial={false}
             animate={{
               x: index * slotWidth,
-              fill: getColor(index, { comparing, swapping, sorted }),
+              fill: getColor(index, { comparing, swapping, sorted, pivot }),
               opacity: inactive ? 0.25 : 1,
             }}
             transition={{ duration: moveSeconds, ease: "easeInOut" }}
