@@ -3,7 +3,7 @@ import BarChart from "./components/BarChart";
 import Controls from "./components/Controls";
 import { usePlayback } from "./hooks/usePlayback";
 import { ALGORITHMS } from "./algorithms";
-import { createItems } from "./utils/array";
+import { createItems, createSortedItems } from "./utils/array";
 
 const DEFAULT_SIZE = 30;
 
@@ -28,6 +28,10 @@ export default function App() {
     setItems(createItems(size));
   }
 
+  function handleSortedArray() {
+    setItems(createSortedItems(size));
+  }
+
   return (
     <main style={{ padding: 24 }}>
       <h1>Visortr</h1>
@@ -42,6 +46,7 @@ export default function App() {
           ))}
         </select>
         <button onClick={handleNewArray}>New array</button>
+        <button onClick={handleSortedArray}>Sorted array</button>
         <label>
           Size: {size}{" "}
           <input
@@ -73,6 +78,7 @@ export default function App() {
         swapping={playback.step.swapping}
         sorted={playback.step.sorted}
         range={playback.step.range}
+        pivot={playback.step.pivot}
         stepDelay={playback.delay}
       />
     </main>
