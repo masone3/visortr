@@ -1,14 +1,14 @@
-export function generateRandomArray(size, min = 10, max = 100) {
-  return Array.from({ length: size }, () =>
-    Math.floor(Math.random() * (max - min + 1)) + min
-  );
-}
-
 let nextId = 0;
 
+function toItems(values) {
+  return values.map((value) => ({ id: nextId++, value }));
+}
+
 export function createItems(size, min = 10, max = 100) {
-  return generateRandomArray(size, min, max).map((value) => ({
-    id: nextId++,
-    value,
-  }));
+  return toItems(generateRandomArray(size, min, max));
+}
+
+export function createSortedItems(size, min = 10, max = 100) {
+  const values = generateRandomArray(size, min, max).sort((a, b) => a - b);
+  return toItems(values);
 }
