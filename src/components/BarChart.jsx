@@ -5,7 +5,7 @@ const CHART_HEIGHT = 400;
 const BAR_GAP = 2;
 const MAX_MOVE_SECONDS = 0.3;
 
-const COLORS = {
+export const COLORS = {
   default: "#38bdf8",
   comparing: "#facc15",
   swapping: "#f87171",
@@ -43,6 +43,7 @@ export default function BarChart({
     >
       {items.map((item, index) => {
         const barHeight = (item.value / maxValue) * CHART_HEIGHT;
+        const inactive = range && (index < range[0] || index > range[1]);
         return (
           <motion.rect
             key={item.id}
