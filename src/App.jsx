@@ -1,77 +1,37 @@
-import { useMemo, useState } from "react";
-import BarChart from "./components/BarChart";
-import Controls from "./components/Controls";
-import InfoPanel from "./components/InfoPanel";
-import Legend from "./components/Legend";
-import Toolbar from "./components/Toolbar";
-import { usePlayback } from "./hooks/usePlayback";
-import { ALGORITHMS } from "./algorithms";
-import { createItems, createSortedItems } from "./utils/array";
-import { computeStats } from "./utils/stats";
+import { useState } from "react";
+import SortingView from "./views/SortingView";
+import PathfindingView from "./views/PathfindingView";
 
-const DEFAULT_SIZE = 30;
+const VIEWS = [
+  { key: "sorting", label: "Sorting" },
+  { key: "pathfinding", label: "Pathfinding" },
+];
 
 export default function App() {
-  const [size, setSize] = useState(DEFAULT_SIZE);
-  const [items, setItems] = useState(() => createItems(DEFAULT_SIZE));
-  const [algoKey, setAlgoKey] = useState("merge");
-
-  const algo = ALGORITHMS[algoKey];
-  const steps = useMemo(() => algo.run(items), [algo, items]);
-  const stats = useMemo(() => computeStats(steps), [steps]);
-  const playback = usePlayback(steps);
-
-  const current = stats[Math.min(playback.index, playback.last)];
-
-  function handleSizeChange(newSize) {
-    setSize(newSize);
-    setItems(createItems(newSize));
-  }
+  const [view, setView] = useState("sorting");
 
   return (
     <main style={{ padding: 24 }}>
       <h1>Visortr</h1>
       <p>See algorithms think.</p>
 
-      <Toolbar
-        algoKey={algoKey}
-        size={size}
-        onAlgoChange={setAlgoKey}
-        onSizeChange={handleSizeChange}
-        onNewArray={() => setItems(createItems(size))}
-        onSortedArray={() => setItems(createSortedItems(size))}
-      />
+      <nav style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {VIEWS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setView(key)}
+            style={{
+              background: view === key ? "#38bdf8" : undefined,
+              color: view === key ? "#0f172a" : undefined,
+              fontWeight: view === key ? "bold" : "normal",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
 
-      <Controls
-        isPlaying={playback.isPlaying}
-        index={playback.index}
-        last={playback.last}
-        speed={playback.speed}
-        onPlay={playback.play}
-        onPause={playback.pause}
-        onNext={playback.next}
-        onPrev={playback.prev}
-        onReset={playback.reset}
-        onSpeedChange={playback.setSpeed}
-      />
-
-      <Legend />
-
-      <BarChart
-        items={playback.step.array}
-        comparing={playback.step.comparing}
-        swapping={playback.step.swapping}
-        sorted={playback.step.sorted}
-        range={playback.step.range}
-        pivot={playback.step.pivot}
-        stepDelay={playback.delay}
-      />
-
-      <InfoPanel
-        algo={algo}
-        comparisons={current.comparisons}
-        swaps={current.swaps}
-      />
+      {view === "sorting" ? <SortingView /> : <PathfindingView />}
     </main>
   );
 }
