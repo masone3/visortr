@@ -1,5 +1,6 @@
-import { useRef } from "react";
-import { ROWS, COLS } from "../utils/grid";
+import { useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { ROWS, COLS, toId } from "../utils/grid";
 
 const CELL = 20;
 const WIDTH = COLS * CELL;
@@ -11,6 +12,10 @@ export const GRID_COLORS = {
   wall: "#94a3b8",
   start: "#4ade80",
   end: "#f87171",
+  visited: "#2563eb",
+  frontier: "#22d3ee",
+  current: "#c084fc",
+  path: "#facc15",
 };
 
 function sameCell(a, b) {
@@ -29,11 +34,19 @@ export default function Grid({
   grid,
   start,
   end,
+  visited = [],
+  frontier = [],
+  path = [],
+  current = null,
   onPaint,
   onMoveStart,
   onMoveEnd,
 }) {
   const drag = useRef(null);
+
+  const visitedSet = useMemo(() => new Set(visited), [visited]);
+  const frontierSet = useMemo(() => new Set(frontier), [frontier]);
+  const pathSet = useMemo(() => new Set(path), [path]);
 
   function apply(cell) {
     const mode = drag.current;
@@ -72,6 +85,20 @@ export default function Grid({
     drag.current = null;
   }
 
+  function getFill(row, col, cell) {
+    const here = { row, col };
+    if (sameCell(here, start)) return GRID_COLORS.start;
+    if (sameCell(here, end)) return GRID_COLORS.end;
+    if (cell.wall) return GRID_COLORS.wall;
+
+    const id = toId(row, col);
+    if (pathSet.has(id)) return GRID_COLORS.path;
+    if (id === current) return GRID_COLORS.current;
+    if (frontierSet.has(id)) return GRID_COLORS.frontier;
+    if (visitedSet.has(id)) return GRID_COLORS.visited;
+    return GRID_COLORS.empty;
+  }
+
   return (
     <svg
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -89,25 +116,20 @@ export default function Grid({
       onPointerCancel={handlePointerUp}
     >
       {grid.flatMap((cells, row) =>
-        cells.map((cell, col) => {
-          const here = { row, col };
-          let fill = cell.wall ? GRID_COLORS.wall : GRID_COLORS.empty;
-          if (sameCell(here, start)) fill = GRID_COLORS.start;
-          if (sameCell(here, end)) fill = GRID_COLORS.end;
-
-          return (
-            <rect
-              key={`${row}-${col}`}
-              x={col * CELL}
-              y={row * CELL}
-              width={CELL}
-              height={CELL}
-              fill={fill}
-              stroke={GRID_COLORS.line}
-              strokeWidth={1}
-            />
-          );
-        })
+        cells.map((cell, col) => (
+          <motion.rect
+            key={`${row}-${col}`}
+            x={col * CELL}
+            y={row * CELL}
+            width={CELL}
+            height={CELL}
+            stroke={GRID_COLORS.line}
+            strokeWidth={1}
+            initial={false}
+            animate={{ fill: getFill(row, col, cell) }}
+            transition={{ duration: 0.2 }}
+          />
+        ))
       )}
     </svg>
   );
