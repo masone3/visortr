@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import ComparisonTable from "../components/ComparisonTable";
 import Controls from "../components/Controls";
 import Grid, { GRID_COLORS } from "../components/Grid";
 import { usePlayback } from "../hooks/usePlayback";
@@ -34,7 +35,7 @@ export default function PathfindingView() {
   const [grid, setGrid] = useState(createGrid);
   const [start, setStart] = useState(DEFAULT_START);
   const [end, setEnd] = useState(DEFAULT_END);
-  const [algoKey, setAlgoKey] = useState("dijkstra");
+  const [algoKey, setAlgoKey] = useState("astar");
   const [tool, setTool] = useState("wall");
 
   const algo = PATHFINDERS[algoKey];
@@ -43,6 +44,24 @@ export default function PathfindingView() {
     [algo, grid, start, end]
   );
   const playback = usePlayback(steps);
+
+  const results = useMemo(
+    () =>
+      Object.entries(PATHFINDERS).map(([key, a]) => {
+        const s = a.run(grid, start, end);
+        const last = s[s.length - 1];
+        const found = last.path.length > 0;
+        return {
+          key,
+          name: a.name,
+          visited: last.visited.length,
+          found,
+          length: found ? last.path.length : null,
+          cost: found ? pathCost(grid, last.path) : null,
+        };
+      }),
+    [grid, start, end]
+  );
 
   const finalStep = steps[steps.length - 1];
   const atEnd = playback.index === playback.last;
@@ -191,6 +210,8 @@ export default function PathfindingView() {
         )}
         <p style={{ margin: 0, fontSize: 14, opacity: 0.8 }}>{algo.info.note}</p>
       </section>
+
+      <ComparisonTable results={results} activeKey={algoKey} />
     </>
   );
 }
