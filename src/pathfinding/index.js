@@ -1,6 +1,7 @@
 import { bfs } from "./bfs";
 import { dfs } from "./dfs";
 import { dijkstra } from "./dijkstra";
+import { astar } from "./astar";
 
 export const PATHFINDERS = {
   bfs: {
@@ -34,6 +35,17 @@ export const PATHFINDERS = {
       optimal: "Yes: the lowest total cost",
       complexity: "O((V + E) log V)",
       note: "The log V comes from the heap. On a grid with no weights it behaves just like BFS. Weights must not be negative.",
+    },
+  },
+  astar: {
+    name: "A* Search",
+    run: astar,
+    info: {
+      description:
+        "Like Dijkstra, but ranks cells by cost so far plus a guess of the cost remaining (Manhattan distance). The guess pulls the search toward the goal.",
+      optimal: "Yes, as long as the guess never overestimates",
+      complexity: "O((V + E) log V) worst case, usually far less work",
+      note: "With a guess of zero, A* is exactly Dijkstra. The better the guess (without going over), the fewer cells it explores.",
     },
   },
 };
