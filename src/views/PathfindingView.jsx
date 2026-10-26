@@ -6,25 +6,36 @@ import { PATHFINDERS } from "../pathfinding";
 import {
   createGrid,
   setWall,
+  setWeight,
+  pathCost,
   DEFAULT_START,
   DEFAULT_END,
+  DEFAULT_WEIGHT,
+  HEAVY_WEIGHT,
 } from "../utils/grid";
 
 const LEGEND = [
   { key: "start", label: "Start" },
   { key: "end", label: "End" },
   { key: "wall", label: "Wall" },
+  { key: "weight", label: `Weight (cost ${HEAVY_WEIGHT})` },
   { key: "frontier", label: "Frontier" },
   { key: "current", label: "Current" },
   { key: "visited", label: "Visited" },
   { key: "path", label: "Path" },
 ];
 
+const TOOLS = [
+  { key: "wall", label: "Wall tool" },
+  { key: "weight", label: "Weight tool" },
+];
+
 export default function PathfindingView() {
   const [grid, setGrid] = useState(createGrid);
   const [start, setStart] = useState(DEFAULT_START);
   const [end, setEnd] = useState(DEFAULT_END);
-  const [algoKey, setAlgoKey] = useState("bfs");
+  const [algoKey, setAlgoKey] = useState("dijkstra");
+  const [tool, setTool] = useState("wall");
 
   const algo = PATHFINDERS[algoKey];
   const steps = useMemo(
@@ -36,12 +47,26 @@ export default function PathfindingView() {
   const finalStep = steps[steps.length - 1];
   const atEnd = playback.index === playback.last;
   const foundPath = finalStep.path.length > 0;
+  const currentPath = playback.step.path;
 
-  function handlePaint(row, col, wall) {
-    setGrid((current) => setWall(current, row, col, wall));
+  function handlePaint(row, col, mode) {
+    setGrid((current) => {
+      switch (mode) {
+        case "draw":
+          return setWall(current, row, col, true);
+        case "erase":
+          return setWall(current, row, col, false);
+        case "weigh":
+          return setWeight(current, row, col, HEAVY_WEIGHT);
+        case "unweigh":
+          return setWeight(current, row, col, DEFAULT_WEIGHT);
+        default:
+          return current;
+      }
+    });
   }
 
-  function handleClearWalls() {
+  function handleClearBoard() {
     setGrid(createGrid());
   }
 
@@ -61,12 +86,29 @@ export default function PathfindingView() {
             </option>
           ))}
         </select>
-        <button onClick={handleClearWalls}>Clear walls</button>
+
+        {TOOLS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setTool(key)}
+            style={{
+              background: tool === key ? "#38bdf8" : undefined,
+              color: tool === key ? "#0f172a" : undefined,
+              fontWeight: tool === key ? "bold" : "normal",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+
+        <button onClick={handleClearBoard}>Clear board</button>
         <button onClick={handleResetAll}>Reset all</button>
-        <span style={{ fontSize: 14, opacity: 0.8 }}>
-          Drag to draw or erase walls. Drag the green and red squares to move them.
-        </span>
       </div>
+
+      <p style={{ fontSize: 14, opacity: 0.8, margin: "8px 0 0" }}>
+        Drag to paint with the selected tool (drag over an existing wall or weight to
+        remove it). Drag the green and red squares to move them.
+      </p>
 
       <Controls
         isPlaying={playback.isPlaying}
@@ -88,7 +130,7 @@ export default function PathfindingView() {
               style={{
                 width: 12,
                 height: 12,
-                borderRadius: 3,
+                borderRadius: key === "weight" ? "50%" : 3,
                 background: GRID_COLORS[key],
                 display: "inline-block",
               }}
@@ -102,9 +144,10 @@ export default function PathfindingView() {
         grid={grid}
         start={start}
         end={end}
+        tool={tool}
         visited={playback.step.visited}
         frontier={playback.step.frontier}
-        path={playback.step.path}
+        path={currentPath}
         current={playback.step.current}
         onPaint={handlePaint}
         onMoveStart={setStart}
@@ -128,10 +171,16 @@ export default function PathfindingView() {
           </div>
           <div>
             <strong>Path length:</strong>{" "}
-            {playback.step.path.length > 0 ? playback.step.path.length : "-"}
+            {currentPath.length > 0 ? currentPath.length : "-"}
           </div>
           <div>
-            <strong>Shortest path guaranteed:</strong> {algo.info.shortest}
+            <strong>Path cost:</strong>{" "}
+            {currentPath.length > 0 ? pathCost(grid, currentPath) : "-"}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 32, flexWrap: "wrap", margin: "12px 0" }}>
+          <div>
+            <strong>Optimal:</strong> {algo.info.optimal}
           </div>
           <div>
             <strong>Time:</strong> {algo.info.complexity}
