@@ -5,13 +5,14 @@ import InfoPanel from "../components/InfoPanel";
 import Legend from "../components/Legend";
 import Toolbar from "../components/Toolbar";
 import { usePlayback } from "../hooks/usePlayback";
+import { usePlaybackShortcuts } from "../hooks/usePlaybackShortcuts";
 import { ALGORITHMS } from "../algorithms";
 import { createItems, createSortedItems } from "../utils/array";
 import { computeStats } from "../utils/stats";
 
 const DEFAULT_SIZE = 30;
 
-export default function SortingView() {
+export default function SortingView({ active }) {
   const [size, setSize] = useState(DEFAULT_SIZE);
   const [items, setItems] = useState(() => createItems(DEFAULT_SIZE));
   const [algoKey, setAlgoKey] = useState("merge");
@@ -20,6 +21,7 @@ export default function SortingView() {
   const steps = useMemo(() => algo.run(items), [algo, items]);
   const stats = useMemo(() => computeStats(steps), [steps]);
   const playback = usePlayback(steps);
+  usePlaybackShortcuts(playback, active);
 
   const current = stats[Math.min(playback.index, playback.last)];
 

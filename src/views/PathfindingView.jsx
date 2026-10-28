@@ -3,6 +3,7 @@ import ComparisonTable from "../components/ComparisonTable";
 import Controls from "../components/Controls";
 import Grid, { GRID_COLORS } from "../components/Grid";
 import { usePlayback } from "../hooks/usePlayback";
+import { usePlaybackShortcuts } from "../hooks/usePlaybackShortcuts";
 import { PATHFINDERS } from "../pathfinding";
 import {
   createGrid,
@@ -14,6 +15,7 @@ import {
   DEFAULT_WEIGHT,
   HEAVY_WEIGHT,
 } from "../utils/grid";
+import { generateMaze, createRandomWalls } from "../utils/generators";
 
 const LEGEND = [
   { key: "start", label: "Start" },
@@ -31,7 +33,7 @@ const TOOLS = [
   { key: "weight", label: "Weight tool" },
 ];
 
-export default function PathfindingView() {
+export default function PathfindingView({ active }) {
   const [grid, setGrid] = useState(createGrid);
   const [start, setStart] = useState(DEFAULT_START);
   const [end, setEnd] = useState(DEFAULT_END);
@@ -44,6 +46,7 @@ export default function PathfindingView() {
     [algo, grid, start, end]
   );
   const playback = usePlayback(steps);
+  usePlaybackShortcuts(playback, active);
 
   const results = useMemo(
     () =>
@@ -95,10 +98,25 @@ export default function PathfindingView() {
     setEnd(DEFAULT_END);
   }
 
+  function handleMaze() {
+    const maze = generateMaze();
+    setGrid(maze.grid);
+    setStart(maze.start);
+    setEnd(maze.end);
+  }
+
+  function handleRandomWalls() {
+    setGrid(createRandomWalls(start, end));
+  }
+
   return (
     <>
-      <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-        <select value={algoKey} onChange={(e) => setAlgoKey(e.target.value)}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <select
+          value={algoKey}
+          onChange={(e) => setAlgoKey(e.target.value)}
+          aria-label="Pathfinding algorithm"
+        >
           {Object.entries(PATHFINDERS).map(([key, a]) => (
             <option key={key} value={key}>
               {a.name}
@@ -110,6 +128,7 @@ export default function PathfindingView() {
           <button
             key={key}
             onClick={() => setTool(key)}
+            aria-pressed={tool === key}
             style={{
               background: tool === key ? "#38bdf8" : undefined,
               color: tool === key ? "#0f172a" : undefined,
@@ -120,6 +139,8 @@ export default function PathfindingView() {
           </button>
         ))}
 
+        <button onClick={handleMaze}>Generate maze</button>
+        <button onClick={handleRandomWalls}>Random walls</button>
         <button onClick={handleClearBoard}>Clear board</button>
         <button onClick={handleResetAll}>Reset all</button>
       </div>
@@ -206,7 +227,9 @@ export default function PathfindingView() {
           </div>
         </div>
         {atEnd && !foundPath && (
-          <p style={{ color: "#f87171", fontWeight: "bold" }}>No path found</p>
+          <p role="status" style={{ color: "#f87171", fontWeight: "bold" }}>
+            No path found
+          </p>
         )}
         <p style={{ margin: 0, fontSize: 14, opacity: 0.8 }}>{algo.info.note}</p>
       </section>
