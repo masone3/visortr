@@ -11,7 +11,7 @@ export default function App() {
   const [view, setView] = useState("sorting");
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="app">
       <h1>Visortr</h1>
       <p>See algorithms think.</p>
 
@@ -20,6 +20,7 @@ export default function App() {
           <button
             key={key}
             onClick={() => setView(key)}
+            aria-pressed={view === key}
             style={{
               background: view === key ? "#38bdf8" : undefined,
               color: view === key ? "#0f172a" : undefined,
@@ -31,7 +32,12 @@ export default function App() {
         ))}
       </nav>
 
-      {view === "sorting" ? <SortingView /> : <PathfindingView />}
+      <div hidden={view !== "sorting"}>
+        <SortingView active={view === "sorting"} />
+      </div>
+      <div hidden={view !== "pathfinding"}>
+        <PathfindingView active={view === "pathfinding"} />
+      </div>
     </main>
   );
 }
