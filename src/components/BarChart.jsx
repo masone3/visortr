@@ -1,17 +1,10 @@
 import { motion } from "framer-motion";
+import { COLORS } from "../constants/colors";
 
 const CHART_WIDTH = 800;
 const CHART_HEIGHT = 400;
 const BAR_GAP = 2;
 const MAX_MOVE_SECONDS = 0.3;
-
-export const COLORS = {
-  default: "#38bdf8",
-  comparing: "#facc15",
-  swapping: "#f87171",
-  sorted: "#4ade80",
-  pivot: "#c084fc",
-};
 
 function getColor(index, { comparing, swapping, sorted, pivot }) {
   if (swapping.includes(index)) return COLORS.swapping;

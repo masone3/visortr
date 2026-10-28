@@ -1,4 +1,4 @@
-import { COLORS } from "./BarChart";
+import { COLORS } from "../constants/colors";
 
 const ENTRIES = [
   { key: "default", label: "Unsorted" },

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import ComparisonTable from "../components/ComparisonTable";
 import Controls from "../components/Controls";
-import Grid, { GRID_COLORS } from "../components/Grid";
+import Grid from "../components/Grid";
+import { GRID_COLORS } from "../constants/colors";
 import { usePlayback } from "../hooks/usePlayback";
 import { usePlaybackShortcuts } from "../hooks/usePlaybackShortcuts";
 import { PATHFINDERS } from "../pathfinding";

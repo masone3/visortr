@@ -1,23 +1,11 @@
 import { useMemo, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ROWS, COLS, toId } from "../utils/grid";
+import { GRID_COLORS } from "../constants/colors";
 
 const CELL = 20;
 const WIDTH = COLS * CELL;
 const HEIGHT = ROWS * CELL;
-
-export const GRID_COLORS = {
-  empty: "#0f172a",
-  line: "#1e293b",
-  wall: "#94a3b8",
-  start: "#4ade80",
-  end: "#f87171",
-  visited: "#2563eb",
-  frontier: "#22d3ee",
-  current: "#c084fc",
-  path: "#facc15",
-  weight: "#f97316",
-};
 
 function sameCell(a, b) {
   return a.row === b.row && a.col === b.col;
