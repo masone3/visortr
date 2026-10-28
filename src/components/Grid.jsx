@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ROWS, COLS, toId } from "../utils/grid";
 
 const CELL = 20;
@@ -45,6 +45,7 @@ export default function Grid({
   onMoveEnd,
 }) {
   const drag = useRef(null);
+  const reduceMotion = useReducedMotion();
 
   const visitedSet = useMemo(() => new Set(visited), [visited]);
   const frontierSet = useMemo(() => new Set(frontier), [frontier]);
@@ -113,6 +114,8 @@ export default function Grid({
     <svg
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       width="100%"
+      role="img"
+      aria-label="Pathfinding grid. Drag to draw walls or move the start and end squares."
       style={{
         display: "block",
         maxWidth: WIDTH,
@@ -126,32 +129,38 @@ export default function Grid({
       onPointerCancel={handlePointerUp}
     >
       {grid.flatMap((cells, row) =>
-        cells.map((cell, col) => (
-          <g key={`${row}-${col}`}>
-            <motion.rect
-              x={col * CELL}
-              y={row * CELL}
-              width={CELL}
-              height={CELL}
-              stroke={GRID_COLORS.line}
-              strokeWidth={1}
-              initial={false}
-              animate={{ fill: getFill(row, col, cell) }}
-              transition={{ duration: 0.2 }}
-            />
-            {cell.weight > 1 && !cell.wall && (
-              <circle
-                cx={col * CELL + CELL / 2}
-                cy={row * CELL + CELL / 2}
-                r={4}
-                fill={GRID_COLORS.weight}
-                stroke={GRID_COLORS.empty}
-                strokeWidth={1.5}
-                pointerEvents="none"
+        cells.map((cell, col) => {
+          const onPath = pathSet.has(toId(row, col));
+          return (
+            <g key={`${row}-${col}`}>
+              <motion.rect
+                x={col * CELL}
+                y={row * CELL}
+                width={CELL}
+                height={CELL}
+                stroke={GRID_COLORS.line}
+                strokeWidth={1}
+                initial={false}
+                animate={{
+                  fill: getFill(row, col, cell),
+                  scale: onPath && !reduceMotion ? [1, 1.4, 1] : 1,
+                }}
+                transition={{ duration: 0.2, scale: { duration: 0.35 } }}
               />
-            )}
-          </g>
-        ))
+              {cell.weight > 1 && !cell.wall && (
+                <circle
+                  cx={col * CELL + CELL / 2}
+                  cy={row * CELL + CELL / 2}
+                  r={4}
+                  fill={GRID_COLORS.weight}
+                  stroke={GRID_COLORS.empty}
+                  strokeWidth={1.5}
+                  pointerEvents="none"
+                />
+              )}
+            </g>
+          );
+        })
       )}
     </svg>
   );
